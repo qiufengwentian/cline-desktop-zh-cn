@@ -29,7 +29,7 @@ npm run launch
 
 ## 使用、更新与故障排查
 
-始终通过 `npm run launch` 或该快捷方式启动补丁。官方 Cline 更新后，请运行 `npm run self-check`；若版本规则缺失或页面显示异常，请停止使用补丁并提交包含 Cline FileVersion 的 issue。开发者更新基础字典的说明见 [翻译来源](docs/SOURCE-PROVENANCE.md)。
+始终通过 `npm run launch` 或该快捷方式启动补丁。官方 Cline 更新后，请运行 `npm run self-check`；若版本规则缺失或页面显示异常，请停止使用补丁并提交包含 Cline FileVersion 的 [issue](https://github.com/ExSchwi/cline-desktop-zh-cn/issues)。开发者更新基础字典的说明见 [翻译来源](docs/SOURCE-PROVENANCE.md)。
 
 安全软件可能提示 WebView2 的本机远程调试参数。这是本工具进行页面注入的可见行为。完整的端口、权限和卸载边界见 [安全与隐私说明](docs/SECURITY.md)。
 

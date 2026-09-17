@@ -5,6 +5,14 @@
   "description": "Cline Desktop 简体中文运行时汉化补丁。",
   "license": "Apache-2.0",
   "author": "Exschwi",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ExSchwi/cline-desktop-zh-cn.git"
+  },
+  "homepage": "https://github.com/ExSchwi/cline-desktop-zh-cn#readme",
+  "bugs": {
+    "url": "https://github.com/ExSchwi/cline-desktop-zh-cn/issues"
+  },
   "scripts": {
     "generate-dictionary": "bun tools/generate-dictionary.ts",
     "launch": "node src/launcher.mjs",
