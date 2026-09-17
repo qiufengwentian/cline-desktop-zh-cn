@@ -1,0 +1,22 @@
+{
+  "name": "cline-desktop-zh-cn",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Cline Desktop 简体中文运行时汉化补丁。",
+  "license": "Apache-2.0",
+  "author": "Exschwi",
+  "scripts": {
+    "generate-dictionary": "bun tools/generate-dictionary.ts",
+    "launch": "node src/launcher.mjs",
+    "check": "node --check src/launcher.mjs && node --check src/injector.mjs && node --check tools/self-check.mjs && node --check tools/shortcut.mjs",
+    "self-check": "node tools/self-check.mjs",
+    "install-shortcut": "node tools/shortcut.mjs install",
+    "uninstall-shortcut": "node tools/shortcut.mjs uninstall",
+    "dev:audit-compatibility": "node tools/dev/audit-compatibility.mjs",
+    "dev:audit-bundle-compatibility": "node tools/dev/audit-bundle-compatibility.mjs"
+  },
+  "engines": {
+    "node": ">=22",
+    "bun": ">=1.3"
+  }
+}

@@ -1,0 +1,12 @@
+Cline Desktop Simplified Chinese Runtime Patch
+
+This repository includes generated translation dictionary content derived from
+the Cline Desktop typed localization catalogs in Cline/Cline:
+https://github.com/cline/cline
+
+Generation baseline: Desktop 0.0.28, commit
+a7a792af83d6db1317f11475064866e92a4c72e8.
+
+The upstream Cline source is licensed under the Apache License, Version 2.0.
+This project is unofficial and is not affiliated with, endorsed by, or
+supported by Cline or its contributors.
