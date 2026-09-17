@@ -1,4 +1,4 @@
-import { waitForTarget, evaluate } from "../src/injector.mjs";
+import { waitForTarget, evaluate } from "../../src/injector.mjs";
 
 const port = Number(process.argv[2]);
 if (!Number.isInteger(port)) throw new Error("Usage: node tools/verify-settings.mjs <cdp-port>");

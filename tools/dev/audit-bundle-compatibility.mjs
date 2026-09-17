@@ -1,11 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
-import { waitForTarget, evaluate } from "../src/injector.mjs";
+import { waitForTarget, evaluate } from "../../src/injector.mjs";
 
 const port = Number(process.argv[2]);
 const here = dirname(fileURLToPath(import.meta.url));
-const payload = JSON.parse(await readFile(resolve(here, "../generated/dictionary.generated.json"), "utf8"));
+const payload = JSON.parse(await readFile(resolve(here, "../../generated/dictionary.generated.json"), "utf8"));
 const { target } = await waitForTarget(port, 5_000);
 const result = await evaluate(target.webSocketDebuggerUrl, `(async () => {
   const entries = ${JSON.stringify(Object.entries(payload.dictionary))};

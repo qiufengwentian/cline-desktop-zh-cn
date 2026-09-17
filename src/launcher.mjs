@@ -2,14 +2,16 @@ import { spawn } from "node:child_process";
 import { access, mkdir, open, readFile, stat, unlink, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
+import { basename, dirname, resolve } from "node:path";
 import { inject } from "./injector.mjs";
+import { getResources } from "./resources.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(here, "..");
-const dictionaryPath = resolve(projectRoot, "generated/dictionary.generated.json");
-const lockPath = resolve(projectRoot, "artifacts/launcher.lock.json");
-const localConfigPath = resolve(projectRoot, "local.config.json");
+const standalone = basename(process.execPath).toLowerCase() === "cline-desktop-zh-cn.exe";
+const runtimeRoot = standalone ? dirname(process.execPath) : projectRoot;
+const lockPath = resolve(runtimeRoot, "artifacts/launcher.lock.json");
+const localConfigPath = resolve(runtimeRoot, "local.config.json");
 
 async function configuredOfficialExe() {
   if (process.env.CLINE_OFFICIAL_EXE) return resolve(process.env.CLINE_OFFICIAL_EXE);
@@ -27,7 +29,7 @@ async function configuredOfficialExe() {
   for (const candidate of candidates) {
     try { if ((await stat(candidate)).isFile()) return candidate; } catch {}
   }
-  throw new Error("未找到官方 cline-app.exe。请设置 CLINE_OFFICIAL_EXE，或在项目根目录创建 local.config.json：{\"officialExe\":\"C:\\\\path\\\\to\\\\cline-app.exe\"}。");
+  throw new Error(`未找到官方 Cline（cline-app.exe）。请安装官方 Cline，或在 ${localConfigPath} 中填写：{"officialExe":"C:\\\\path\\\\to\\\\cline-app.exe"}。`);
 }
 
 function freePort() {
@@ -116,18 +118,18 @@ process.once("SIGTERM", () => handleSignal("SIGTERM"));
 async function main() {
   const officialExe = await configuredOfficialExe();
   await access(officialExe);
-  await access(dictionaryPath);
   await acquireLock();
   ownsLock = true;
   const version = await fileVersion(officialExe);
+  const resources = getResources(version);
   const port = await freePort();
   await writeFile(lockPath, `${JSON.stringify({ pid: process.pid, port, officialExe, version, startedAt: new Date().toISOString() }, null, 2)}\n`);
   child = spawn(officialExe, [], { cwd: dirname(officialExe), detached: false, stdio: "ignore", windowsHide: false, env: { ...process.env, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-address=127.0.0.1 --remote-debugging-port=${port}` } });
   childExit = new Promise((resolve, reject) => { child.once("exit", resolve); child.once("error", reject); });
   console.log(`已启动官方 Cline ${version}（PID ${child.pid}），临时 CDP 仅监听 127.0.0.1:${port}。`);
-  const evidence = await inject(port, dictionaryPath, version);
+  const evidence = await inject(port, resources);
   console.log(JSON.stringify({ version, ...evidence }, null, 2));
-  heartbeat = setInterval(() => inject(port, dictionaryPath, version).catch(() => {}), 2_000);
+  heartbeat = setInterval(() => inject(port, resources).catch(() => {}), 2_000);
   await childExit;
 }
 
