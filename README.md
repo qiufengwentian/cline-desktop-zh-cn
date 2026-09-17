@@ -14,7 +14,7 @@
 { "officialExe": "C:\\path\\to\\cline-app.exe" }
 ```
 
-首次运行遇到 Windows Defender 或 SmartScreen 提示时，请根据自己的安全策略核对来源。项目不提供绕过安全软件的操作。EXE 体积与启动时间以每次 Release 的构建说明为准。
+v0.1.1 的 EXE 当前未做商业代码签名，首次运行可能触发 Windows SmartScreen 或 Defender 提示；请根据自己的安全策略核对来源。项目不提供绕过安全软件的操作。EXE 体积与启动时间以每次 Release 的构建说明为准。
 
 需要快捷方式时，可将 `install-shortcut.ps1` 或 `install-shortcut.cmd` 放在 EXE 同目录并运行；它只创建当前用户桌面的快捷方式，不写入注册表或官方 Cline 目录。删除快捷方式可在桌面手动删除。
 
