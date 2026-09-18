@@ -1,7 +1,11 @@
 import dictionaryPayload from "../generated/dictionary.generated.json" with { type: "json" };
 import rules030 from "../rules/0.0.30.json" with { type: "json" };
+import rules032 from "../rules/0.0.32.json" with { type: "json" };
 
-const rules = new Map([[rules030.version, rules030]]);
+const rules = new Map([
+  [rules030.version, rules030],
+  [rules032.version, rules032],
+]);
 
 export function getResources(version) {
   const versionRules = rules.get(version);

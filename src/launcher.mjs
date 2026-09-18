@@ -73,6 +73,7 @@ let ownsLock = false;
 let child;
 let childExit;
 let stopping;
+let detectedVersion = "未检测到";
 
 function waitForChildExit(timeoutMs = 5_000) {
   if (!childExit) return Promise.resolve(true);
@@ -110,6 +111,17 @@ function handleSignal(signal) {
   });
 }
 
+async function showFatalError(message) {
+  if (!standalone || process.platform !== "win32") return;
+  const escaped = message.replaceAll("'", "''");
+  const script = `Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show('${escaped}', 'Cline 中文版启动失败', 'OK', 'Error') | Out-Null`;
+  await new Promise((resolve) => {
+    const dialog = spawn("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], { stdio: "ignore", windowsHide: false });
+    dialog.once("close", resolve);
+    dialog.once("error", resolve);
+  });
+}
+
 // Node delivers SIGINT on Windows consoles. SIGTERM is supported when sent by
 // Node or task-management tooling; neither handler targets pre-existing Cline.
 process.once("SIGINT", () => handleSignal("SIGINT"));
@@ -121,6 +133,7 @@ async function main() {
   await acquireLock();
   ownsLock = true;
   const version = await fileVersion(officialExe);
+  detectedVersion = version;
   const resources = getResources(version);
   const port = await freePort();
   await writeFile(lockPath, `${JSON.stringify({ pid: process.pid, port, officialExe, version, startedAt: new Date().toISOString() }, null, 2)}\n`);
@@ -136,7 +149,9 @@ async function main() {
 try {
   await main();
 } catch (error) {
-  console.error(`启动失败：${error.message}`);
+  const message = `启动失败：${error.message}\n\n检测到的 Cline 版本：${detectedVersion}\n\n请查看 README 或提交 Issue。`;
+  console.error(message);
+  await showFatalError(message);
   process.exitCode = 1;
 } finally {
   await cleanup("启动器退出");

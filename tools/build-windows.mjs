@@ -9,7 +9,7 @@ const output = resolve(outputDir, "Cline-Desktop-ZH-CN.exe");
 await mkdir(outputDir, { recursive: true });
 await rm(output, { force: true });
 
-const child = spawn("bun", ["build", "--compile", "src/launcher.mjs", "--outfile", output], { cwd: root, stdio: "inherit", windowsHide: false });
+const child = spawn("bun", ["build", "--compile", "--windows-hide-console", "src/launcher.mjs", "--outfile", output], { cwd: root, stdio: "inherit", windowsHide: false });
 const exitCode = await new Promise((resolveExit) => child.once("exit", (code) => resolveExit(code ?? 1)));
 if (exitCode !== 0) process.exit(exitCode);
 

@@ -2,11 +2,11 @@
 
 面向官方 Cline Desktop 的简体中文运行时补丁。非官方项目，与 Cline 官方无隶属关系，也不提供官方支持。
 
-当前已验证官方 Cline Desktop `0.0.30`。未知版本会加载基础字典，但不会加载版本专用规则；升级 Cline 后请先运行自检并查看 [兼容性说明](docs/COMPATIBILITY.md)。
+当前已验证官方 Cline Desktop `0.0.30` 和 `0.0.32`。未知版本会加载基础字典，但不会加载版本专用规则；升级 Cline 后请先运行自检并查看 [兼容性说明](docs/COMPATIBILITY.md)。
 
 ## 推荐安装与使用
 
-普通用户请打开 GitHub Release 页面，下载 `Cline-Desktop-ZH-CN.exe`，将它放在任意可写目录后双击运行。电脑无需预装 Node.js 或 Bun。启动器只会启动官方 Cline 的子进程并通过临时的本机 CDP 连接注入翻译，不会修改官方安装目录。
+普通用户请打开 GitHub Release 页面，下载 `Cline-Desktop-ZH-CN.exe`，将它放在任意可写目录后双击运行。电脑无需预装 Node.js 或 Bun。用户版 EXE 默认不打开 CMD 窗口；后台启动器会继续运行以维持翻译观察器和退出清理。启动器只会启动官方 Cline 的子进程并通过临时的本机 CDP 连接注入翻译，不会修改官方安装目录。
 
 启动器会自动查找常见的官方安装位置。若提示找不到官方 Cline，请在 EXE 同目录创建 `local.config.json`，填入实际的 `cline-app.exe` 路径后再次双击：
 
@@ -51,7 +51,7 @@ npm run launch
 
 ## 使用、更新与故障排查
 
-始终通过 `npm run launch` 或该快捷方式启动补丁。官方 Cline 更新后，请运行 `npm run self-check`；若版本规则缺失或页面显示异常，请停止使用补丁并提交包含 Cline FileVersion 的 [issue](https://github.com/ExSchwi/cline-desktop-zh-cn/issues)。开发者更新基础字典的说明见 [翻译来源](docs/SOURCE-PROVENANCE.md)。
+始终通过 `npm run launch` 或该快捷方式启动补丁。官方 Cline 更新后，请运行 `npm run self-check`；若版本规则缺失、页面显示异常或启动失败，请查看启动器显示的错误信息，并提交包含 Cline FileVersion 的 [issue](https://github.com/ExSchwi/cline-desktop-zh-cn/issues)。开发者更新基础字典的说明见 [翻译来源](docs/SOURCE-PROVENANCE.md)。
 
 安全软件可能提示 WebView2 的本机远程调试参数。这是本工具进行页面注入的可见行为。完整的端口、权限和卸载边界见 [安全与隐私说明](docs/SECURITY.md)。
 
