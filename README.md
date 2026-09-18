@@ -16,7 +16,7 @@
 { "officialExe": "C:\\path\\to\\cline-app.exe" }
 ```
 
-EXE 使用仓库内生成的非官方 `ZH` 补丁图标，和官方 Cline 图标有明确区别，避免把上游品牌标志当作本项目资产。v0.1.1 的 EXE 当前未做商业代码签名，首次运行可能触发 Windows SmartScreen 或 Defender 提示；请根据自己的安全策略核对来源。项目不提供绕过安全软件的操作。EXE 体积与启动时间以每次 Release 的构建说明为准。
+当前版本为 v0.1.2。EXE 使用仓库内生成的简洁中性应用图标，不使用 Bun 图标，也不复制官方 Cline 图标。EXE 当前未做商业代码签名，首次运行可能触发 Windows SmartScreen 或 Defender 提示；请根据自己的安全策略核对来源。项目不提供绕过安全软件的操作。EXE 体积与启动时间以每次 Release 的构建说明为准。
 
 需要快捷方式时，可将 `install-shortcut.ps1` 或 `install-shortcut.cmd` 放在 EXE 同目录并运行；它只创建当前用户桌面的快捷方式，不写入注册表或官方 Cline 目录。删除快捷方式可在桌面手动删除。
 
@@ -47,7 +47,7 @@ npm run launch
 { "officialExe": "C:\\path\\to\\cline-app.exe" }
 ```
 
-构建完成后可运行 `npm run install-shortcut` 创建当前用户桌面的“Cline 中文版”快捷方式；快捷方式目标和图标都来自最终 `dist/Cline-Desktop-ZH-CN.exe`。`npm run uninstall-shortcut` 只删除该快捷方式。删除本补丁时，请自行删除项目目录。
+构建完成后可运行 `npm run install-shortcut` 创建当前用户桌面的“Cline 中文版”快捷方式。快捷方式目标是最终 `dist/Cline-Desktop-ZH-CN.exe`；图标优先来自用户本机已安装的官方 `cline-app.exe`，仅用于本地快捷方式显示，不进入本项目仓库或二进制。找不到官方 EXE 时使用补丁自身图标并给出非阻断提示。`npm run uninstall-shortcut` 只删除该快捷方式。删除本补丁时，请自行删除项目目录。
 
 `tools/dev/` 仅供维护者使用；其中部分脚本会连接活跃 CDP 页面并读取页面内容，`reload-page.mjs` 会请求页面重载。
 

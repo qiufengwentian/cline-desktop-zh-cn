@@ -10,20 +10,30 @@ const desktop = resolve(process.env.USERPROFILE ?? process.env.HOME ?? root, "De
 const shortcut = resolve(desktop, "Cline 中文版.lnk");
 const quoted = (value) => `'${value.replaceAll("'", "''")}'`;
 async function configuredOfficialExe() {
-  if (process.env.CLINE_OFFICIAL_EXE) return resolve(process.env.CLINE_OFFICIAL_EXE);
+  const configured = process.env.CLINE_OFFICIAL_EXE;
+  if (configured) {
+    const candidate = resolve(configured);
+    try { if ((await stat(candidate)).isFile()) return candidate; } catch {}
+  }
   try {
     const config = JSON.parse(await readFile(resolve(root, "local.config.json"), "utf8"));
-    if (typeof config.officialExe === "string" && config.officialExe.trim()) return resolve(config.officialExe);
+    if (typeof config.officialExe === "string" && config.officialExe.trim()) {
+      const candidate = resolve(config.officialExe);
+      try { if ((await stat(candidate)).isFile()) return candidate; } catch {}
+    }
   } catch (error) { if (error.code !== "ENOENT") throw error; }
   for (const candidate of [process.env.LOCALAPPDATA && resolve(process.env.LOCALAPPDATA, "Programs", "Cline", "cline-app.exe"), process.env.ProgramFiles && resolve(process.env.ProgramFiles, "Cline", "cline-app.exe"), process.env["ProgramFiles(x86)"] && resolve(process.env["ProgramFiles(x86)"], "Cline", "cline-app.exe")].filter(Boolean)) { try { if ((await stat(candidate)).isFile()) return candidate; } catch {} }
-  throw new Error("未找到官方 cline-app.exe；请设置 CLINE_OFFICIAL_EXE 或 local.config.json。");
+  return "";
 }
 if (process.argv[2] === "install") {
   const exe = await configuredOfficialExe();
-  await access(launcher); await access(exe); await access(compiledExe);
-  const script = `$s=(New-Object -ComObject WScript.Shell).CreateShortcut(${quoted(shortcut)});$s.TargetPath=${quoted(compiledExe)};$s.Arguments='';$s.WorkingDirectory=${quoted(root)};$s.IconLocation=${quoted(`${compiledExe},0`)};$s.Description='通过本地运行时汉化启动官方 Cline Desktop';$s.Save()`;
+  await access(launcher); await access(compiledExe);
+  const iconSource = exe ? `${exe},0` : `${compiledExe},0`;
+  const script = `$s=(New-Object -ComObject WScript.Shell).CreateShortcut(${quoted(shortcut)});$s.TargetPath=${quoted(compiledExe)};$s.Arguments='';$s.WorkingDirectory=${quoted(root)};$s.IconLocation=${quoted(iconSource)};$s.Description='通过本地运行时汉化启动官方 Cline Desktop';$s.Save()`;
   const result = spawnSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], { encoding: "utf8", windowsHide: true });
   if (result.status !== 0) throw new Error(result.stderr.trim() || "创建快捷方式失败");
+  if (exe) console.log(`快捷方式图标来源：${exe}`);
+  else console.warn("警告：未找到官方 cline-app.exe，快捷方式暂使用补丁 EXE 图标；启动时仍会继续查找官方程序。");
   console.log(`已创建快捷方式：${shortcut}`);
 } else if (process.argv[2] === "uninstall") {
   if (process.argv[3]) throw new Error("卸载只删除桌面快捷方式；请手动删除补丁项目目录。");

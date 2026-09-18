@@ -1,7 +1,7 @@
 {
   "name": "cline-desktop-zh-cn",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Cline Desktop 简体中文运行时汉化补丁。",
   "license": "Apache-2.0",
   "author": "Exschwi",
