@@ -5,6 +5,7 @@ import { dirname, resolve } from "node:path";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const launcher = resolve(root, "src/launcher.mjs");
+const compiledExe = resolve(root, "dist/Cline-Desktop-ZH-CN.exe");
 const desktop = resolve(process.env.USERPROFILE ?? process.env.HOME ?? root, "Desktop");
 const shortcut = resolve(desktop, "Cline 中文版.lnk");
 const quoted = (value) => `'${value.replaceAll("'", "''")}'`;
@@ -19,8 +20,8 @@ async function configuredOfficialExe() {
 }
 if (process.argv[2] === "install") {
   const exe = await configuredOfficialExe();
-  await access(launcher); await access(exe);
-  const script = `$s=(New-Object -ComObject WScript.Shell).CreateShortcut(${quoted(shortcut)});$s.TargetPath=${quoted(process.execPath)};$s.Arguments=${quoted(`"${launcher}"`)};$s.WorkingDirectory=${quoted(root)};$s.IconLocation=${quoted(exe)};$s.Description='通过本地运行时汉化启动官方 Cline Desktop';$s.Save()`;
+  await access(launcher); await access(exe); await access(compiledExe);
+  const script = `$s=(New-Object -ComObject WScript.Shell).CreateShortcut(${quoted(shortcut)});$s.TargetPath=${quoted(compiledExe)};$s.Arguments='';$s.WorkingDirectory=${quoted(root)};$s.IconLocation=${quoted(`${compiledExe},0`)};$s.Description='通过本地运行时汉化启动官方 Cline Desktop';$s.Save()`;
   const result = spawnSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], { encoding: "utf8", windowsHide: true });
   if (result.status !== 0) throw new Error(result.stderr.trim() || "创建快捷方式失败");
   console.log(`已创建快捷方式：${shortcut}`);
@@ -36,6 +37,6 @@ if (process.argv[2] === "install") {
   const result = spawnSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], { encoding: "utf8", windowsHide: true });
   if (result.status !== 0) throw new Error(result.stderr.trim() || "无法读取快捷方式");
   const details = JSON.parse(result.stdout);
-  if (resolve(details.TargetPath) !== resolve(process.execPath) || details.Arguments !== `"${launcher}"` || resolve(details.WorkingDirectory) !== root) throw new Error(`拒绝删除非本项目创建的快捷方式：${shortcut}`);
+  if (resolve(details.TargetPath) !== resolve(compiledExe) || details.Arguments !== "" || resolve(details.WorkingDirectory) !== root) throw new Error(`拒绝删除非本项目创建的快捷方式：${shortcut}`);
   await rm(shortcut); console.log(`已删除快捷方式：${shortcut}`);
 } else throw new Error("用法：node tools/shortcut.mjs install | uninstall");

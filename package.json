@@ -17,7 +17,7 @@
     "generate-dictionary": "bun tools/generate-dictionary.ts",
     "launch": "node src/launcher.mjs",
     "build:windows": "bun tools/build-windows.mjs",
-    "check": "node --check src/launcher.mjs && node --check src/injector.mjs && node --check src/resources.mjs && node --check tools/self-check.mjs && node --check tools/shortcut.mjs && node --check tools/build-windows.mjs",
+    "check": "node --check src/launcher.mjs && node --check src/injector.mjs && node --check src/resources.mjs && node --check tools/self-check.mjs && node --check tools/shortcut.mjs && node --check tools/build-windows.mjs && node --check tools/generate-icon.mjs",
     "self-check": "node tools/self-check.mjs",
     "install-shortcut": "node tools/shortcut.mjs install",
     "uninstall-shortcut": "node tools/shortcut.mjs uninstall",

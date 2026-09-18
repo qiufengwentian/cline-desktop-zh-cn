@@ -5,15 +5,18 @@ import { resolve } from "node:path";
 const root = resolve(import.meta.dirname, "..");
 const outputDir = resolve(root, "dist");
 const output = resolve(outputDir, "Cline-Desktop-ZH-CN.exe");
+const icon = resolve(root, "assets/cline-zh-patch.ico");
 
 await mkdir(outputDir, { recursive: true });
 await rm(output, { force: true });
+await import("./generate-icon.mjs");
 
-const child = spawn("bun", ["build", "--compile", "--windows-hide-console", "src/launcher.mjs", "--outfile", output], { cwd: root, stdio: "inherit", windowsHide: false });
+const child = spawn("bun", ["build", "--compile", "--windows-hide-console", `--windows-icon=${icon}`, "--windows-title=Cline Desktop ZH-CN", "--windows-publisher=Unofficial Cline Desktop ZH-CN Patch", "--windows-description=Unofficial Chinese runtime patch for Cline Desktop", "src/launcher.mjs", "--outfile", output], { cwd: root, stdio: "inherit", windowsHide: false });
 const exitCode = await new Promise((resolveExit) => child.once("exit", (code) => resolveExit(code ?? 1)));
 if (exitCode !== 0) process.exit(exitCode);
 
 const bytes = (await stat(output)).size;
 console.log(`已生成 Windows 用户版：${output}`);
 console.log(`文件大小：${(bytes / 1024 / 1024).toFixed(2)} MiB`);
+console.log(`图标资源已嵌入 EXE：${icon}`);
 console.log("资源已编译进 EXE；可选旁置 local.config.json 指定 officialExe。");

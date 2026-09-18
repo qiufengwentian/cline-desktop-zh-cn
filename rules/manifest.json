@@ -1,0 +1,10 @@
+{
+  "fallback": {
+    "maxVersionDistance": 2,
+    "strategy": "nearest-lower-rule-then-capability-probe"
+  },
+  "versions": {
+    "0.0.30": { "status": "verified", "extends": null },
+    "0.0.32": { "status": "verified", "extends": "0.0.30" }
+  }
+}

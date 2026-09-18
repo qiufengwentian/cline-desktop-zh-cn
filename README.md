@@ -2,19 +2,21 @@
 
 面向官方 Cline Desktop 的简体中文运行时补丁。非官方项目，与 Cline 官方无隶属关系，也不提供官方支持。
 
-当前已验证官方 Cline Desktop `0.0.30` 和 `0.0.32`。未知版本会加载基础字典，但不会加载版本专用规则；升级 Cline 后请先运行自检并查看 [兼容性说明](docs/COMPATIBILITY.md)。
+当前已验证官方 Cline Desktop `0.0.30` 和 `0.0.32`。未知的相邻小版本会先加载最近规则，再检查 CDP target、基础 DOM、属性节点、基础注入和 MutationObserver；探测通过后进入“兼容模式（未正式验证）”，不会因为缺少精确规则直接退出。升级 Cline 后请运行自检并查看 [兼容性说明](docs/COMPATIBILITY.md)。
 
 ## 推荐安装与使用
 
 普通用户请打开 GitHub Release 页面，下载 `Cline-Desktop-ZH-CN.exe`，将它放在任意可写目录后双击运行。电脑无需预装 Node.js 或 Bun。用户版 EXE 默认不打开 CMD 窗口；后台启动器会继续运行以维持翻译观察器和退出清理。启动器只会启动官方 Cline 的子进程并通过临时的本机 CDP 连接注入翻译，不会修改官方安装目录。
 
-启动器会自动查找常见的官方安装位置。若提示找不到官方 Cline，请在 EXE 同目录创建 `local.config.json`，填入实际的 `cline-app.exe` 路径后再次双击：
+启动器会自动查找常见的官方安装位置。正式支持版本和兼容模式都不会弹窗；只有找不到官方 EXE、CDP 页面、必要资源或注入/探测失败时，才显示包含版本、失败阶段和排查链接的 Windows 错误窗口。开发者可使用 `--debug` 或 `CLINE_ZH_DEBUG=1` 写入 `artifacts/launcher.debug.log`，记录 target、能力探测、心跳和退出清理。
+
+若提示找不到官方 Cline，请在 EXE 同目录创建 `local.config.json`，填入实际的 `cline-app.exe` 路径后再次双击：
 
 ```json
 { "officialExe": "C:\\path\\to\\cline-app.exe" }
 ```
 
-v0.1.1 的 EXE 当前未做商业代码签名，首次运行可能触发 Windows SmartScreen 或 Defender 提示；请根据自己的安全策略核对来源。项目不提供绕过安全软件的操作。EXE 体积与启动时间以每次 Release 的构建说明为准。
+EXE 使用仓库内生成的非官方 `ZH` 补丁图标，和官方 Cline 图标有明确区别，避免把上游品牌标志当作本项目资产。v0.1.1 的 EXE 当前未做商业代码签名，首次运行可能触发 Windows SmartScreen 或 Defender 提示；请根据自己的安全策略核对来源。项目不提供绕过安全软件的操作。EXE 体积与启动时间以每次 Release 的构建说明为准。
 
 需要快捷方式时，可将 `install-shortcut.ps1` 或 `install-shortcut.cmd` 放在 EXE 同目录并运行；它只创建当前用户桌面的快捷方式，不写入注册表或官方 Cline 目录。删除快捷方式可在桌面手动删除。
 
@@ -45,7 +47,7 @@ npm run launch
 { "officialExe": "C:\\path\\to\\cline-app.exe" }
 ```
 
-可运行 `npm run install-shortcut` 创建当前用户桌面的“Cline 中文版”快捷方式；`npm run uninstall-shortcut` 只删除该快捷方式。删除本补丁时，请自行删除项目目录。
+构建完成后可运行 `npm run install-shortcut` 创建当前用户桌面的“Cline 中文版”快捷方式；快捷方式目标和图标都来自最终 `dist/Cline-Desktop-ZH-CN.exe`。`npm run uninstall-shortcut` 只删除该快捷方式。删除本补丁时，请自行删除项目目录。
 
 `tools/dev/` 仅供维护者使用；其中部分脚本会连接活跃 CDP 页面并读取页面内容，`reload-page.mjs` 会请求页面重载。
 

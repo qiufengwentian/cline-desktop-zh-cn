@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { access, mkdir, open, readFile, stat, unlink, writeFile } from "node:fs/promises";
+import { access, appendFile, mkdir, open, readFile, stat, unlink, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import { fileURLToPath } from "node:url";
 import { basename, dirname, resolve } from "node:path";
@@ -11,7 +11,17 @@ const projectRoot = resolve(here, "..");
 const standalone = basename(process.execPath).toLowerCase() === "cline-desktop-zh-cn.exe";
 const runtimeRoot = standalone ? dirname(process.execPath) : projectRoot;
 const lockPath = resolve(runtimeRoot, "artifacts/launcher.lock.json");
+const debugLogPath = resolve(runtimeRoot, "artifacts/launcher.debug.log");
 const localConfigPath = resolve(runtimeRoot, "local.config.json");
+const debugEnabled = process.argv.includes("--debug") || process.env.CLINE_ZH_DEBUG === "1";
+const versionOverride = process.argv.find((argument) => argument.startsWith("--version-override="))?.slice("--version-override=".length);
+let phase = "初始化";
+
+async function debug(event, details = {}) {
+  if (!debugEnabled) return;
+  await mkdir(dirname(debugLogPath), { recursive: true });
+  await appendFile(debugLogPath, `${JSON.stringify({ at: new Date().toISOString(), event, phase, pid: process.pid, ...details })}\n`);
+}
 
 async function configuredOfficialExe() {
   if (process.env.CLINE_OFFICIAL_EXE) return resolve(process.env.CLINE_OFFICIAL_EXE);
@@ -96,8 +106,10 @@ async function cleanup(reason) {
   if (stopping) return stopping;
   stopping = (async () => {
     if (heartbeat) clearInterval(heartbeat);
+    await debug("cleanup", { reason, childPid: child?.pid ?? null, childExitCode: child?.exitCode ?? null });
     const childStopped = await stopChild(reason);
     if (ownsLock) await unlink(lockPath).catch(() => {});
+    await debug("cleanup-complete", { childStopped, lockRemoved: ownsLock });
     return childStopped;
   })();
   return stopping;
@@ -128,28 +140,41 @@ process.once("SIGINT", () => handleSignal("SIGINT"));
 process.once("SIGTERM", () => handleSignal("SIGTERM"));
 
 async function main() {
+  phase = "查找官方 Cline";
   const officialExe = await configuredOfficialExe();
   await access(officialExe);
+  await debug("official-exe", { officialExe });
+  phase = "获取版本";
   await acquireLock();
   ownsLock = true;
-  const version = await fileVersion(officialExe);
+  const detectedFileVersion = await fileVersion(officialExe);
+  const version = versionOverride || detectedFileVersion;
   detectedVersion = version;
+  await debug("version", { detectedFileVersion, version, versionOverride: versionOverride ?? null });
+  phase = "选择规则";
   const resources = getResources(version);
+  if (resources.warning) { console.warn(resources.warning); await debug("compatibility-warning", { warning: resources.warning, mode: resources.mode, ruleVersion: resources.ruleVersion }); }
+  phase = "建立临时 CDP";
   const port = await freePort();
-  await writeFile(lockPath, `${JSON.stringify({ pid: process.pid, port, officialExe, version, startedAt: new Date().toISOString() }, null, 2)}\n`);
+  await writeFile(lockPath, `${JSON.stringify({ pid: process.pid, port, officialExe, version, detectedFileVersion, mode: resources.mode, ruleVersion: resources.ruleVersion, startedAt: new Date().toISOString() }, null, 2)}\n`);
+  phase = "启动官方 Cline";
   child = spawn(officialExe, [], { cwd: dirname(officialExe), detached: false, stdio: "ignore", windowsHide: false, env: { ...process.env, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-address=127.0.0.1 --remote-debugging-port=${port}` } });
   childExit = new Promise((resolve, reject) => { child.once("exit", resolve); child.once("error", reject); });
+  child.once("exit", (code, signal) => { debug("official-exit", { childPid: child.pid, code, signal }).catch(() => {}); });
   console.log(`已启动官方 Cline ${version}（PID ${child.pid}），临时 CDP 仅监听 127.0.0.1:${port}。`);
+  phase = "等待页面并执行兼容探测";
   const evidence = await inject(port, resources);
-  console.log(JSON.stringify({ version, ...evidence }, null, 2));
-  heartbeat = setInterval(() => inject(port, resources).catch(() => {}), 2_000);
+  console.log(JSON.stringify({ version, mode: resources.mode, ruleVersion: resources.ruleVersion, ...evidence }, null, 2));
+  await debug("injected", { version, mode: resources.mode, ruleVersion: resources.ruleVersion, target: evidence.target, capability: evidence.capability, result: evidence.result });
+  heartbeat = setInterval(() => inject(port, resources).then((result) => debug("heartbeat", { observer: result.observer, changed: result.result?.changed })).catch((error) => debug("heartbeat-failed", { message: error.message })), 2_000);
   await childExit;
 }
 
 try {
   await main();
 } catch (error) {
-  const message = `启动失败：${error.message}\n\n检测到的 Cline 版本：${detectedVersion}\n\n请查看 README 或提交 Issue。`;
+  await debug("fatal", { message: error.message, detectedVersion });
+  const message = `启动失败\n\n检测到的 Cline 版本：${detectedVersion}\n失败阶段：${phase}\n原因：${error.message}\n\n请查看 README、docs/COMPATIBILITY.md，或提交 Issue：https://github.com/ExSchwi/cline-desktop-zh-cn/issues`;
   console.error(message);
   await showFatalError(message);
   process.exitCode = 1;
