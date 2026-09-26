@@ -1,11 +1,13 @@
 import dictionaryPayload from "../generated/dictionary.generated.json" with { type: "json" };
 import rules030 from "../rules/0.0.30.json" with { type: "json" };
 import rules032 from "../rules/0.0.32.json" with { type: "json" };
+import rules037 from "../rules/0.0.37.json" with { type: "json" };
 import manifest from "../rules/manifest.json" with { type: "json" };
 
 const rules = new Map([
   [rules030.version, rules030],
   [rules032.version, rules032],
+  [rules037.version, rules037],
 ]);
 
 function parseVersion(value) { return String(value).split(".").map((part) => Number.parseInt(part, 10) || 0); }

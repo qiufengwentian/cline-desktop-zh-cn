@@ -5,6 +5,7 @@
   },
   "versions": {
     "0.0.30": { "status": "verified", "extends": null },
-    "0.0.32": { "status": "verified", "extends": "0.0.30" }
+    "0.0.32": { "status": "verified", "extends": "0.0.30" },
+    "0.0.37": { "status": "verified", "extends": "0.0.32" }
   }
 }
