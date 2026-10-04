@@ -2,7 +2,7 @@
 
 面向官方 Cline Desktop 的简体中文运行时补丁。非官方项目，与 Cline 官方无隶属关系，也不提供官方支持。
 
-当前已验证官方 Cline Desktop `0.0.30` 和 `0.0.32`。未知的相邻小版本会先加载最近规则，再检查 CDP target、基础 DOM、属性节点、基础注入和 MutationObserver；探测通过后进入“兼容模式（未正式验证）”，不会因为缺少精确规则直接退出。升级 Cline 后请运行自检并查看 [兼容性说明](docs/COMPATIBILITY.md)。
+当前已验证官方 Cline Desktop `0.0.37。未知的相邻小版本会先加载最近规则，再检查 CDP target、基础 DOM、属性节点、基础注入和 MutationObserver；探测通过后进入“兼容模式（未正式验证）”，不会因为缺少精确规则直接退出。升级 Cline 后请运行自检并查看 [兼容性说明](docs/COMPATIBILITY.md)。
 
 ## 推荐安装与使用
 
